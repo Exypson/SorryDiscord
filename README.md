@@ -9,12 +9,6 @@
 [![License](https://img.shields.io/badge/License-GPL%20v3-c0392b?style=for-the-badge&logo=opensourceinitiative&logoColor=white)](./LICENSE)
 [![Version](https://img.shields.io/badge/Version-1.0-4ade80?style=for-the-badge&logo=semanticrelease&logoColor=white)](https://github.com/Exypson/SorryDiscord/releases)
 
-<br/>
-
-*Because nobody has the time or disk space to download 500GB of games just to unlock some orbs.*
-
-<br/>
-
 [Get Started](#installation) &nbsp;·&nbsp; [How it works](#how-it-works) &nbsp;·&nbsp; [Steam Mode](#steam-quest-mode) &nbsp;·&nbsp; [Usage](#usage) &nbsp;·&nbsp; [Structure](#project-structure) &nbsp;·&nbsp; [Legal](#legal-notice)
 
 </div>
@@ -31,7 +25,7 @@ It does not touch your Discord client files, inject DLLs into memory, or spam se
 
 <br/>
 
-## 🚨 Steam Quest Mode
+## Steam Quest Mode
 
 Certain quests have an extra layer of verification. For these titles, Discord doesn't just check your running processes—it also looks for proof that Steam has registered or started downloading the game. Basic process renaming fails here, but Steam Quest Mode solves this problem.
 
@@ -62,18 +56,6 @@ Just type the game's title into the built-in search. The program grabs the game'
 
 **Polished Terminal Interface** includes clear ANSI color-coding and animated status spinners so you always know what the script is doing.
 
-<br/>
-
-## Why this method works
-
-Discord checks what game you're playing by reading the list of active processes running on your Windows machine. If it notices `TslGame.exe` in the process table, it concludes that you're running PUBG. Discord does not check the file hash, check digital signatures, or scan the contents of the game folder—it simply checks the image name.
-
-Detecting this trick would force Discord to implement intrusive, kernel-level anti-cheat drivers (like Riot's Vanguard). That would take massive system privileges, cause privacy concerns, and ruin Discord's reputation as a lightweight communication app. Discord simply isn't going to do that for small promotional quest badges.
-
-**What this tool avoids doing:** It never tampers with Discord's Electron code, never injects scripts into Discord's DevTools console, and never sends fake HTTP packets to Discord quest endpoints. Those shortcuts are easily detected when Discord checks its own client integrity. This tool leaves the Discord client completely untouched and simply queries public endpoints to see what process names Discord expects.
-
-<br/>
-
 ## Requirements
 
 Python 3.7 or newer, Windows operating system. An active internet connection to download the game lists. Discord needs to be running in the background, since the spoofer works by letting Discord scan your active processes.
@@ -87,8 +69,6 @@ git clone https://github.com/Exypson/SorryDiscord.git
 cd SorryDiscord
 pip install -r requirements.txt
 ```
-
-<br/>
 
 ## Usage
 
@@ -120,42 +100,6 @@ Open the application and choose your first target game. Once the process is acti
 
 <br/>
 
-## How it works
-
-The script fetches the current game directory from Discord's public endpoint (`/api/v9/applications/detectable`) and grabs the exact executable name Discord is listening for. It then duplicates the spoofer binary (or the base `pythonw.exe` interpreter in development mode) into your selected output folder (`Desktop/Win64/` by default), renames it to match the expected game name, and embeds your settings.
-
-When that fake game binary runs, it displays a minimal countdown clock with your configured runtime. Once the clock hits 00:00, it kicks off a detached self-destruction command (when `AUTO_DELETE` is enabled) that wipes the dummy binary and cleans up empty folders.
-
-For Steam Quest Mode, it takes things a step further: it writes a realistic `appmanifest_<appid>.acf` file into your local `steamapps/` directory and drops the cloned binary inside `steamapps/common/<game>/`. This tricks Discord's local file checks for games like Marathon or Toxic Commando that require proof of a Steam download.
-
-<br/>
-
-## Project Structure
-
-```
-SorryDiscord/
-├── sorrydiscord.py        Main entry point
-├── sorrydiscord/
-│   ├── __init__.py        Version and author metadata
-│   ├── __main__.py        Package entry point, --timer-mode support
-│   ├── config.py          Centralized configuration with settings.py overrides
-│   ├── faker.py           Fake executable creation and launch logic
-│   ├── discord_db.py      Game database loading, search, and selection
-│   ├── steam.py           Steam registry helpers and manifest generation
-│   ├── updater.py         Auto-update from GitHub releases
-│   ├── net.py             HTTP helpers
-│   ├── ui.py              Terminal colors, animations, prompts
-│   └── errors.py          Custom exception hierarchy
-├── tests/                 pytest coverage for pure helpers
-├── settings.py            User-editable configuration
-├── requirements.txt
-└── .github/
-    └── workflows/
-        └── release.yml    PyInstaller build and GitHub Release automation
-```
-
-<br/>
-
 ## Configuration
 
 User-friendly options can be found in `settings.py` at the project's root folder. This file is read when the app boots up and overrides the defaults in `sorrydiscord/config.py`. You can adjust things like output directories and timer lengths there. The version number is tied directly to Git release tags and is handled automatically, so changing it manually is not recommended.
@@ -183,15 +127,3 @@ Misusing this software may violate Discord's Terms of Service.
 ## License
 
 GPL v3. Attribution is required. Any forks or modified versions must remain open-source under GPL v3, and the source code must be made available. Commercial use is not allowed. Check the [LICENSE](./LICENSE) file for full legal terms.
-
-<br/>
-
-<div align="center">
-
-made with questionable life choices by **Exypson**
-
-<br/>
-
-<img src="https://capsule-render.vercel.app/api?type=waving&color=0:4ade80,40:0d1f0d,100:0a0a0a&height=120&section=footer" width="100%"/>
-
-</div>
