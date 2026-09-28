@@ -1,0 +1,64 @@
+name: Build & Release
+
+on:
+  push:
+    tags:
+      - 'v*'  # Triggers on tags like v1.0, v1.0.0, etc.
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install pyinstaller
+
+      - name: Get and validate tag
+        id: tag
+        shell: bash
+        run: |
+          echo "TAG_NAME=${GITHUB_REF_NAME}" >> $GITHUB_OUTPUT
+
+      - name: Write version metadata
+        shell: bash
+        run: |
+          VERSION="${{ steps.tag.outputs.TAG_NAME }}"
+          CLEAN_VERSION="${VERSION#v}"
+          mkdir -p sorrydiscord orbshacker
+          printf 'VERSION = "%s"\n' "${CLEAN_VERSION}" > sorrydiscord/_version.py
+          printf 'VERSION = "%s"\n' "${CLEAN_VERSION}" > orbshacker/_version.py
+
+      - name: Build executable
+        run: |
+          pyinstaller --onefile --name SorryDiscord --noconsole --add-data "settings.py;." --collect-all sorrydiscord --collect-all orbshacker sorrydiscord.py
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2.6.1
+        with:
+          tag_name: ${{ steps.tag.outputs.TAG_NAME }}
+          name: Sorry Discord ${{ steps.tag.outputs.TAG_NAME }}
+          body: |
+            ## Sorry Discord ${{ steps.tag.outputs.TAG_NAME }}
+            
+            ### Download
+            Download `SorryDiscord.exe` below and run it. No Python required!
+            
+            ### What's new
+            See the [commit log](https://github.com/${{ github.repository }}/commits/${{ steps.tag.outputs.TAG_NAME }}) for details.
+          files: dist/SorryDiscord.exe
+          draft: false
+          prerelease: false
